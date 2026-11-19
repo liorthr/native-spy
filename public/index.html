@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Native Spy – recherche de pubs native</title>
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --ink:#1d2433; --mute:#6b7385; --line:#e3e6ec; --acc:#2f5bea; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { background:var(--card); border-bottom:1px solid var(--line); padding:14px 24px; position:sticky; top:0; z-index:5; }
+  h1 { font-size:18px; margin:0 0 10px; }
+  h1 small { color:var(--mute); font-weight:400; font-size:13px; margin-left:8px; }
+  form { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  input, select, button { font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#fff; color:inherit; }
+  input[name=q] { flex:1 1 320px; }
+  button { background:var(--acc); color:#fff; border-color:var(--acc); cursor:pointer; }
+  button.ghost { background:#fff; color:var(--acc); }
+  .tabs { display:flex; gap:4px; margin-top:12px; }
+  .tabs button { background:none; color:var(--mute); border:none; border-bottom:2px solid transparent; border-radius:0; }
+  .tabs button.on { color:var(--ink); border-color:var(--acc); }
+  main { padding:20px 24px; }
+  .meta { color:var(--mute); margin-bottom:14px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:16px; }
+  .ad { background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; display:flex; flex-direction:column; }
+  .ad .img { aspect-ratio:16/10; background:#e9ecf2 center/cover no-repeat; }
+  .ad .body { padding:10px 12px; display:flex; flex-direction:column; gap:6px; flex:1; }
+  .ad .title { font-weight:600; }
+  .ad .sp { color:var(--mute); font-size:12px; }
+  .tags { display:flex; flex-wrap:wrap; gap:4px; margin-top:auto; }
+  .tag { font-size:11px; padding:2px 7px; border-radius:20px; background:#eef1f7; color:#3b4356; }
+  .tag.net { background:#e6edff; color:#2443b5; }
+  .tag.hot { background:#fff1dc; color:#8a5300; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  th, td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { background:#fafbfc; font-weight:600; font-size:12px; color:var(--mute); text-transform:uppercase; }
+  td .ex { color:var(--mute); font-size:12px; }
+  a { color:var(--acc); text-decoration:none; }
+  .empty { padding:40px; text-align:center; color:var(--mute); background:var(--card); border:1px dashed var(--line); border-radius:10px; }
+  .more { display:block; margin:20px auto; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Native Spy <small id="stats"></small></h1>
+  <form id="f">
+    <input name="q" placeholder="Mots-clés : ex. « minceur », « assurance auto -moto », « crypto »" autofocus>
+    <select name="network"><option value="">Tous réseaux</option></select>
+    <select name="country"><option value="">Tous pays</option></select>
+    <select name="days">
+      <option value="0">Toute période</option><option value="1">24 h</option>
+      <option value="7">7 jours</option><option value="30">30 jours</option><option value="90">90 jours</option>
+    </select>
+    <select name="sort">
+      <option value="last_seen">Vues récemment</option>
+      <option value="first_seen">Nouvelles pubs</option>
+      <option value="longevity">Plus longue durée (rentables)</option>
+      <option value="times_seen">Plus d'impressions</option>
+    </select>
+    <button>Rechercher</button>
+    <button type="button" class="ghost" id="csv">Export CSV</button>
+  </form>
+  <div class="tabs">
+    <button type="button" data-tab="ads" class="on">Publicités</button>
+    <button type="button" data-tab="adv">Concurrents (annonceurs)</button>
+  </div>
+</header>
+<main>
+  <div class="meta" id="meta"></div>
+  <div id="out"></div>
+  <button class="more ghost" id="more" hidden>Charger plus</button>
+</main>
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const safeUrl = (u) => /^https?:\/\//i.test(u || '') ? u : '';
+const day = (iso) => iso ? new Date(iso).toLocaleDateString('fr-FR') : '';
+let tab = 'ads', offset = 0;
+
+function qs(extra = {}) {
+  const p = new URLSearchParams(new FormData($('#f')));
+  for (const [k, v] of Object.entries(extra)) p.set(k, v);
+  return p.toString();
+}
+
+function adCard(a) {
+  const img = safeUrl(a.image);
+  const link = safeUrl(a.landing_url) || safeUrl(a.click_url);
+  return `<div class="ad">
+    <div class="img" style="${img ? `background-image:url('${esc(img)}')` : ''}"></div>
+    <div class="body">
+      <div class="title">${esc(a.title)}</div>
+      <div class="sp">${esc(a.sponsor || '')}${a.landing_domain ? ` · ${link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(a.landing_domain)}</a>` : esc(a.landing_domain)}` : ''}</div>
+      <div class="tags">
+        <span class="tag net">${esc(a.network)}</span>
+        <span class="tag ${a.days_running >= 7 ? 'hot' : ''}">${a.days_running} j actif</span>
+        <span class="tag">${a.times_seen} vues</span>
+        <span class="tag">${a.publishers} sites</span>
+        ${a.countries ? `<span class="tag">${esc(a.countries)}</span>` : ''}
+        <span class="tag">vu le ${day(a.last_seen)}</span>
+      </div>
+    </div></div>`;
+}
+
+async function loadAds(append) {
+  if (!append) offset = 0;
+  const r = await fetch('/api/ads?' + qs({ offset, limit: 60 })).then((r) => r.json());
+  $('#meta').textContent = `${r.total} publicité(s) trouvée(s)`;
+  const html = r.rows.map(adCard).join('');
+  if (append) $('#out .grid').insertAdjacentHTML('beforeend', html);
+  else $('#out').innerHTML = r.total ? `<div class="grid">${html}</div>` : `<div class="empty">Aucune pub. Lancez un crawl (npm run crawl) ou essayez d'autres mots-clés.</div>`;
+  offset += r.rows.length;
+  $('#more').hidden = offset >= r.total;
+}
+
+async function loadAdv() {
+  const rows = await fetch('/api/advertisers?' + qs()).then((r) => r.json());
+  $('#meta').textContent = `${rows.length} annonceur(s) concurrent(s)`;
+  $('#more').hidden = true;
+  $('#out').innerHTML = rows.length ? `<table><thead><tr>
+      <th>Annonceur</th><th>Pubs</th><th>Vues</th><th>Réseaux</th><th>Actif du → au</th><th>Exemples de titres</th>
+    </tr></thead><tbody>${rows.map((g) => `<tr>
+      <td><strong>${esc(g.advertiser)}</strong>${g.sponsors.length ? `<div class="ex">${esc(g.sponsors.join(', '))}</div>` : ''}</td>
+      <td>${g.ads}</td><td>${g.impressions}</td><td>${esc(g.networks.join(', '))}</td>
+      <td>${day(g.first_seen)} → ${day(g.last_seen)}</td>
+      <td class="ex">${g.sample_titles.map(esc).join('<br>')}</td></tr>`).join('')}</tbody></table>`
+    : `<div class="empty">Aucun annonceur pour cette recherche.</div>`;
+}
+
+const run = () => (tab === 'ads' ? loadAds(false) : loadAdv());
+$('#f').addEventListener('submit', (e) => { e.preventDefault(); run(); });
+$('#f').addEventListener('change', run);
+$('#more').addEventListener('click', () => loadAds(true));
+$('#csv').addEventListener('click', () => { location.href = '/api/export.csv?' + qs(); });
+document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach((x) => x.classList.toggle('on', x === b));
+  tab = b.dataset.tab; run();
+}));
+
+fetch('/api/stats').then((r) => r.json()).then((s) => {
+  $('#stats').textContent = `${s.ads} pubs en base${s.last_crawl ? ` · dernier crawl ${day(s.last_crawl)}` : ''}`;
+  for (const n of s.networks) $('[name=network]').insertAdjacentHTML('beforeend', `<option value="${esc(n.network)}">${esc(n.network)} (${n.n})</option>`);
+  for (const c of s.countries) $('[name=country]').insertAdjacentHTML('beforeend', `<option value="${esc(c.country)}">${esc(c.country)} (${c.n})</option>`);
+});
+run();
+</script>
+</body>
+</html>

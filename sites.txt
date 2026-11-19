@@ -1,0 +1,87 @@
+# Une URL par ligne. Format optionnel : URL | pays
+# Niche : panneaux solaires / photovoltaïque & pompes à chaleur — France.
+# Cible type de ces annonceurs : propriétaires de maison, 45 ans et +, souvent en région.
+# Les widgets Taboola / Outbrain / MGID sont surtout en BAS DES ARTICLES : le crawler
+# visite automatiquement quelques articles de chaque site (--articles 4 par défaut).
+# Pour désactiver un site, mettez un # devant.
+
+# --- Presse régionale (cible n°1 : propriétaires en maison individuelle) ---
+https://www.ouest-france.fr/ | FR
+https://www.letelegramme.fr/ | FR
+https://www.sudouest.fr/ | FR
+https://www.ladepeche.fr/ | FR
+https://www.midilibre.fr/ | FR
+https://www.lindependant.fr/ | FR
+https://www.leprogres.fr/ | FR
+https://www.ledauphine.com/ | FR
+https://www.estrepublicain.fr/ | FR
+https://www.dna.fr/ | FR
+https://www.lalsace.fr/ | FR
+https://www.republicain-lorrain.fr/ | FR
+https://www.lavoixdunord.fr/ | FR
+https://www.courrier-picard.fr/ | FR
+https://www.lunion.fr/ | FR
+https://www.lanouvellerepublique.fr/ | FR
+https://www.lamontagne.fr/ | FR
+https://www.lepopulaire.fr/ | FR
+https://www.centrepresseaveyron.fr/ | FR
+https://www.nicematin.com/ | FR
+https://www.varmatin.com/ | FR
+https://www.laprovence.com/ | FR
+https://www.corsematin.com/ | FR
+https://actu.fr/ | FR
+
+# --- Seniors / retraités (très ciblés par le solaire et les PAC) ---
+https://www.notretemps.com/ | FR
+https://www.pleinevie.fr/ | FR
+https://www.senioractu.com/ | FR
+
+# --- Argent, impôts, aides (MaPrimeRénov', crédit d'impôt, factures d'énergie) ---
+https://www.capital.fr/ | FR
+https://www.moneyvox.fr/ | FR
+https://www.toutsurmesfinances.com/ | FR
+https://www.challenges.fr/ | FR
+https://www.boursorama.com/ | FR
+https://www.lexpress.fr/ | FR
+https://www.latribune.fr/ | FR
+https://www.economiematin.fr/ | FR
+https://www.lerevenu.com/ | FR
+
+# --- Maison, travaux, jardin ---
+https://www.maisonapart.com/ | FR
+https://www.journaldelamaison.fr/ | FR
+https://www.cotemaison.fr/ | FR
+https://www.deco.fr/ | FR
+https://www.rustica.fr/ | FR
+https://www.detentejardin.fr/ | FR
+https://www.gerbeaud.com/ | FR
+https://www.batiactu.com/ | FR
+
+# --- Énergie, écologie, tech grand public ---
+https://www.revolution-energetique.com/ | FR
+https://www.futura-sciences.com/ | FR
+https://www.lesnumeriques.com/ | FR
+https://www.presse-citron.net/ | FR
+https://www.numerama.com/ | FR
+https://www.neozone.org/ | FR
+https://www.automobile-propre.com/ | FR
+https://www.lci.fr/ | FR
+
+# --- Grands généralistes / magazines (gros volume Taboola & Outbrain) ---
+https://www.20minutes.fr/ | FR
+https://www.lefigaro.fr/ | FR
+https://www.leparisien.fr/ | FR
+https://www.bfmtv.com/ | FR
+https://www.linternaute.com/ | FR
+https://www.journaldesfemmes.fr/ | FR
+https://www.femmeactuelle.fr/ | FR
+https://www.marmiton.org/ | FR
+https://www.doctissimo.fr/ | FR
+https://www.programme-tv.net/ | FR
+https://www.closermag.fr/ | FR
+https://www.voici.fr/ | FR
+
+# --- Hors France (désactivés : hors cible) ---
+# https://www.foxnews.com/ | US
+# https://www.usatoday.com/ | US
+# https://www.dailymail.co.uk/ | UK

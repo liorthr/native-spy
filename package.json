@@ -1,0 +1,15 @@
+{
+  "name": "native-spy",
+  "version": "1.0.0",
+  "description": "Outil perso d'espionnage de publicités native (Taboola, Outbrain, MGID, Revcontent...) avec recherche par mots-clés",
+  "type": "module",
+  "engines": { "node": ">=22.5" },
+  "scripts": {
+    "crawl": "node --no-warnings src/crawl.js",
+    "serve": "node --no-warnings src/server.js",
+    "test": "node --no-warnings test/run-test.js"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0"
+  }
+}
