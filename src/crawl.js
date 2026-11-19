@@ -1,5 +1,5 @@
 // Crawler : visite des sites éditeurs, repère les widgets native ads et enregistre les pubs.
-// Usage : npm run crawl -- [--sites sites.txt] [--articles 4] [--parallel 3] [--reloads 2] [--url https://…] [--proxy http://user:pass@host:port]
+// Usage : npm run crawl -- [--sites sites.txt] [--articles 4] [--parallel 3] [--reloads 2] [--light] [--url https://…] [--proxy http://user:pass@host:port]
 //                          [--country FR] [--headful] [--chrome] [--debug]
 import { chromium } from 'playwright';
 import { readFileSync, mkdirSync } from 'node:fs';
@@ -22,6 +22,7 @@ const USE_CHROME = !!opt('chrome', false);
 const DEBUG = !!opt('debug', false);
 const PARALLEL = Math.max(1, Number(opt('parallel', 1)));  // nb de sites scannés en même temps
 const RELOADS = Math.max(1, Number(opt('reloads', 1)));    // nb d'affichages par article (les pubs tournent)
+const LIGHT = !!opt('light', false);                        // ne pas télécharger images/vidéos/polices (économise le proxy)
 
 function loadSites(file) {
   if (SINGLE_URL) return [{ url: SINGLE_URL, country: COUNTRY_OVERRIDE || 'FR' }];
@@ -165,9 +166,14 @@ async function main() {
     timezoneId: 'Europe/Paris',
   });
   await context.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => undefined }));
+  if (LIGHT) {
+    // Les URLs des visuels restent récupérées (attribut src), seuls les fichiers ne sont pas téléchargés.
+    await context.route('**/*', (route) => (['image', 'media', 'font'].includes(route.request().resourceType())
+      ? route.abort() : route.continue()));
+  }
   let total = 0, fresh = 0;
   const queue = [...sites];
-  console.log(`Crawl de ${sites.length} site(s), ${PARALLEL} en parallèle, ${RELOADS} affichage(s) par article${PROXY ? ', via proxy' : ''}${USE_CHROME ? ', avec Google Chrome' : ''}…`);
+  console.log(`Crawl de ${sites.length} site(s), ${PARALLEL} en parallèle, ${RELOADS} affichage(s) par article${PROXY ? ', via proxy' : ''}${LIGHT ? ', mode léger' : ''}${USE_CHROME ? ', avec Google Chrome' : ''}…`);
 
   // Chaque « worker » a son propre onglet et prend le site suivant dans la file.
   async function worker() {

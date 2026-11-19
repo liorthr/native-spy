@@ -1,0 +1,23 @@
+# Sites à scanner depuis une IP guadeloupéenne (proxy résidentiel ciblé « GP »).
+# À utiliser avec : npm run crawl -- --sites sites-guadeloupe.txt --country GP --proxy "…" --light
+# ⚠ Vérifiez que chaque site affiche bien des widgets (option --debug) et complétez la liste
+#   avec les sites que vous lisez là-bas.
+
+# --- Médias locaux Guadeloupe / Antilles ---
+https://www.guadeloupe.franceantilles.fr/ | GP
+https://www.rci.fm/ | GP
+https://www.domactu.com/ | GP
+https://www.karibinfo.com/ | GP
+https://outremers360.com/ | GP
+
+# --- Sites nationaux très lus en Guadeloupe : avec une IP guadeloupéenne,
+#     Taboola / Outbrain y affichent les pubs ciblées sur la Guadeloupe ---
+https://www.leparisien.fr/ | GP
+https://www.lefigaro.fr/ | GP
+https://www.20minutes.fr/ | GP
+https://www.ouest-france.fr/ | GP
+https://www.ladepeche.fr/ | GP
+https://www.capital.fr/ | GP
+https://www.notretemps.com/ | GP
+https://www.femmeactuelle.fr/ | GP
+https://www.linternaute.com/ | GP

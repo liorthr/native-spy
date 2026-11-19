@@ -57,6 +57,7 @@ Puis allez sur http://localhost:3000
 | `--articles 8` | Nombre d'articles visités par site (défaut : 4). Plus = plus de pubs |
 | `--parallel 3` | Scanner 3 sites en même temps (plus rapide) |
 | `--reloads 3` | Afficher chaque article 3 fois : les pubs changent à chaque affichage |
+| `--light` | Ne télécharge ni images ni vidéos (divise la consommation du proxy) |
 | `--country US` | Étiqueter le crawl avec un pays |
 | `--proxy http://user:pass@hote:port` | Passer par un proxy (pour voir les pubs d'un autre pays) |
 | `--headful` | Afficher le navigateur (pratique pour déboguer) |
@@ -69,6 +70,35 @@ Exemple — voir les pubs diffusées aux États-Unis via un proxy US :
 ```bash
 npm run crawl -- --sites sites-us.txt --country US --proxy http://user:pass@proxy-us:8080
 ```
+
+## Voir les pubs d'un autre territoire (ex. Guadeloupe)
+
+Les réseaux native choisissent les pubs selon **l'adresse IP** du visiteur. Pour voir ce qui est diffusé
+en Guadeloupe, il faut donc naviguer avec une IP guadeloupéenne, via un **proxy résidentiel** qui propose
+le ciblage pays **GP** (code ISO de la Guadeloupe). La plupart des fournisseurs de proxys résidentiels le proposent,
+avec une facturation au Go.
+
+1. Créez un compte chez un fournisseur de proxys résidentiels, choisissez le pays **Guadeloupe (GP)** et,
+   si possible, une **session fixe (sticky)** de 10 à 30 min plutôt qu'une IP qui change à chaque requête.
+2. Le fournisseur vous donne une adresse du type `http://identifiant:motdepasse@hote:port`
+   (le ciblage pays est souvent inclus dans l'identifiant : suivez sa documentation).
+3. Vérifiez l'IP avant de lancer le crawl (la réponse doit indiquer `GP` / Guadeloupe) :
+
+```bash
+curl -x "http://identifiant:motdepasse@hote:port" https://ipinfo.io/json
+```
+
+4. Lancez le crawl :
+
+```bash
+npm run crawl -- --sites sites-guadeloupe.txt --country GP --light --proxy "http://identifiant:motdepasse@hote:port"
+```
+
+5. Dans l'interface, filtrez sur le pays **GP**.
+
+Mettez l'adresse du proxy entre guillemets. Le mode `--light` réduit fortement la consommation (comptez quelques
+centaines de Mo par crawl au lieu de plusieurs Go). Gardez `--parallel` bas (1 ou 2) : il y a peu d'IP disponibles
+en Guadeloupe.
 
 ## Conseils pour de bons résultats
 
