@@ -58,7 +58,7 @@ Puis allez sur http://localhost:3000
 | `--parallel 3` | Scanner 3 sites en même temps (plus rapide) |
 | `--reloads 3` | Afficher chaque article 3 fois : les pubs changent à chaque affichage |
 | `--light` | Ne télécharge ni images ni vidéos (divise la consommation du proxy) |
-| `--country US` | Étiqueter le crawl avec un pays |
+| `--country GP` | Étiqueter le crawl avec un pays ; le crawl s'arrête si l'IP de sortie n'est pas dans ce pays (sauf `--force`) |
 | `--proxy http://user:pass@hote:port` | Passer par un proxy (pour voir les pubs d'un autre pays) |
 | `--headful` | Afficher le navigateur (pratique pour déboguer) |
 | `--chrome` | Utiliser votre Google Chrome installé (moins souvent bloqué par les sites) |
@@ -77,6 +77,29 @@ Les réseaux native choisissent les pubs selon **l'adresse IP** du visiteur. Pou
 en Guadeloupe, il faut donc naviguer avec une IP guadeloupéenne, via un **proxy résidentiel** qui propose
 le ciblage pays **GP** (code ISO de la Guadeloupe). La plupart des fournisseurs de proxys résidentiels le proposent,
 avec une facturation au Go.
+
+### Option gratuite : un contact en Guadeloupe + Tailscale (exit node)
+
+Il n'existe pas de proxy gratuit en Guadeloupe (vérifié dans les listes publiques ProxyScrape et Geonode :
+0 résultat). La solution gratuite et fiable : faire sortir votre Mac par la connexion d'une personne
+qui se trouve en Guadeloupe, grâce à la fonction **exit node** de Tailscale (gratuite).
+
+1. La personne en Guadeloupe installe **Tailscale** (Mac, PC Windows ou téléphone Android) et accepte
+   votre invitation (console Tailscale → *Users* → *Invite users*, ou partage de l'appareil).
+2. Sur son appareil, elle active **« Run as exit node »** (Android : menu Tailscale ; Mac/PC : menu Tailscale → *Exit node* →
+   *Run as exit node*).
+3. Vous l'approuvez dans https://login.tailscale.com/admin/machines → l'appareil → *Edit route settings* →
+   cochez *Use as exit node*.
+4. **Coupez votre VPN habituel**, puis sur le Mac : menu Tailscale → *Exit node* → choisissez l'appareil guadeloupéen.
+5. Lancez le crawl **sans** `--proxy` : le crawler affiche l'IP de sortie au démarrage et s'arrête si elle n'est pas en GP.
+
+```bash
+npm run crawl -- --sites sites-guadeloupe.txt --country GP --light --parallel 1
+```
+
+Pensez à remettre *Exit node* sur *None* ensuite. Le mode `--light` limite la consommation de la connexion de votre contact.
+
+### Option payante : proxy résidentiel
 
 1. Créez un compte chez un fournisseur de proxys résidentiels, choisissez le pays **Guadeloupe (GP)** et,
    si possible, une **session fixe (sticky)** de 10 à 30 min plutôt qu'une IP qui change à chaque requête.

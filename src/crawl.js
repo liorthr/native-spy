@@ -171,6 +171,17 @@ async function main() {
     await context.route('**/*', (route) => (['image', 'media', 'font'].includes(route.request().resourceType())
       ? route.abort() : route.continue()));
   }
+  // Vérifie depuis quel pays le navigateur sort (proxy, VPN ou exit node Tailscale).
+  try {
+    const res = await context.request.get('https://ipinfo.io/json', { timeout: 15000 });
+    const ip = await res.json();
+    console.log(`IP de sortie : ${ip.ip} — ${ip.city || '?'}, ${ip.region || '?'}, pays ${ip.country || '?'} (${ip.org || ''})`);
+    if (COUNTRY_OVERRIDE && ip.country && ip.country !== COUNTRY_OVERRIDE) {
+      console.log(`⚠ Vous avez demandé --country ${COUNTRY_OVERRIDE} mais l'IP est en ${ip.country} : les pubs vues seront celles de ${ip.country}.`);
+      if (!opt('force', false)) { await browser.close(); console.log('Crawl annulé (ajoutez --force pour continuer quand même).'); return; }
+    }
+  } catch { console.log('IP de sortie : vérification impossible (ipinfo.io injoignable).'); }
+
   let total = 0, fresh = 0;
   const queue = [...sites];
   console.log(`Crawl de ${sites.length} site(s), ${PARALLEL} en parallèle, ${RELOADS} affichage(s) par article${PROXY ? ', via proxy' : ''}${LIGHT ? ', mode léger' : ''}${USE_CHROME ? ', avec Google Chrome' : ''}…`);
